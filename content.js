@@ -46,7 +46,6 @@ window.addEventListener("load", () => {
     fillByLabel("Phone Number", DATA.phone);
     fillByLabel("เบอร์โทรศัพท์", DATA.phone);
 
-    // ✅ 勾選確認
     clickRadioByText("Yes, I have reviewed");
 
     console.log("✅ Google Form auto filled");
