@@ -1,54 +1,71 @@
-function fillByLabel(labelText, value) {
-  const labels = document.querySelectorAll('div[role="heading"], label, span');
+window.addEventListener("message", (event) => {
+  if (event.data.type === "AUTO_FILL_FORM") {
+    fillByQuestion();
+    autoCheckSingleCheckbox();
+  }
+});
 
-  for (const label of labels) {
-    if (label.innerText.includes(labelText)) {
-      const container = label.closest('div');
-      if (!container) continue;
+function fillByQuestion() {
+  const questions = document.querySelectorAll('[role="listitem"]');
 
-      const input = container.querySelector('input[type="text"], textarea');
-      if (input) {
-        input.value = value;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        return true;
+  const answers = {
+    name: "CHO YU CHEUNG",
+    id: "H23208444",          
+    phone: "0932935930"
+  };
+
+  questions.forEach(question => {
+    const titleEl = question.querySelector('[role="heading"]');
+    const input = question.querySelector('input, textarea');
+
+    if (!titleEl || !input || input.value) return;
+
+    const title = titleEl.innerText.toLowerCase();
+
+    if (
+      title.includes("ชื่อ") ||
+      title.includes("name")
+    ) {
+      setValue(input, answers.name);
+    }
+
+    else if (
+      title.includes("บัตรประชาชน") ||
+      title.includes("พาสปอร์ต") ||
+      title.includes("identification") ||
+      title.includes("passport")
+    ) {
+      setValue(input, answers.id);
+    }
+
+    else if (
+      title.includes("เบอร์") ||
+      title.includes("phone")
+    ) {
+      setValue(input, answers.phone);
+    }
+  });
+}
+
+function setValue(input, value) {
+  input.focus();
+  input.value = value;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function autoCheckSingleCheckbox() {
+  const questions = document.querySelectorAll('[role="listitem"]');
+
+  questions.forEach(q => {
+    const options = q.querySelectorAll(
+      '[role="checkbox"], [role="radio"]'
+    );
+
+    if (options.length === 1) {
+      const option = options[0];
+      if (option.getAttribute("aria-checked") !== "true") {
+        option.click();
       }
     }
-  }
-  return false;
+  });
 }
-
-function clickRadioByText(text) {
-  const options = document.querySelectorAll('div[role="radio"]');
-  for (const opt of options) {
-    if (opt.innerText.includes(text)) {
-      opt.click();
-      return true;
-    }
-  }
-  return false;
-}
-
-window.addEventListener("load", () => {
-  setTimeout(() => {
-
-    const DATA = {
-      name: "CHO YU CHEUNG",
-      id: "H23208444",
-      phone: "0932935930"
-    };
-
-    fillByLabel("First Name", DATA.name);
-    fillByLabel("ชื่อ-นามสกุล", DATA.name);
-
-    fillByLabel("Identification Card", DATA.id);
-    fillByLabel("Passport", DATA.id);
-
-    fillByLabel("Phone Number", DATA.phone);
-    fillByLabel("เบอร์โทรศัพท์", DATA.phone);
-
-    clickRadioByText("Yes, I have reviewed");
-
-    console.log("✅ Google Form auto filled");
-
-  }, 2000); 
-});
